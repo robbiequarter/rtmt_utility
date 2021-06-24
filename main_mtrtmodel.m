@@ -1,3 +1,5 @@
+%% MT/RT Utility Model 
+% Requires mymtrtfun.m
 close all 
 clear all
 
@@ -11,10 +13,10 @@ end
 
 
 %% Set Old/Young Metabolic Parameters
+
 global param
 
 %metabolic data parameters: etotal = esit + emove = ao*to + a*t + (b*d^i)/T
-
 if old == 1 % old - used if "old" = 1
     param.myc0 = -9; % accuracy parameters; shifts logistic to the right with scaling
     param.myc1 = 15; % accuracy parameters; shifts logistic to the left with scaling
@@ -34,10 +36,10 @@ elseif old == 0 % young - used if "old" = 0
 end
 
 %both
-% param.myc0to = -1; % Used in optimization
-% param.myc1to = 10; % Used in optimization
-param.myc0to = -6; % -8.75; % Used in new RT function
-param.myc1to = 20; % 35; % Used in new RT function
+param.myc0to = -1; % Used in optimization
+param.myc1to = 10; % Used in optimization
+% param.myc0to = -6; % -8.75; % Used in new RT function
+% param.myc1to = 20; % 35; % Used in new RT function
 param.myeffscale = 1; 
 
 %distance
@@ -54,7 +56,7 @@ myalphascales= 0.8:0.1:1.2;
 myprobscales = 0.8:0.1:1.2;
 
 
-Run Simulation
+%% Run Optimization
 
 % use this index to focus on alpha of a certain value
 alphaind=find(myalphas==70);
@@ -90,7 +92,8 @@ if runsim
 end
 toc
 
-Duration vs. Alpha Figures for range of Effort Valuation/ Reward Valuation/ Probability Scaling
+%% Duration vs. Alpha Figures for range of Effort Valuation/ Reward Valuation/ Probability Scaling
+
 % Aggregate Figures
 figure
 %Effort Valuation Scaling

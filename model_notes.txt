@@ -1,0 +1,7 @@
+Utility Model Notes 04/19/2021
+
+- Hoping to show with higher effort, in response to reward...
+	- greater RT sensitivity
+	- less or the same MT sensitivity
+- Can we show that it is due to higher effort costs, or lower reward valuation?
+	- Can we distinguish between these two?

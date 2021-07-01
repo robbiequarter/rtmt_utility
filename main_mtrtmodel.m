@@ -4,7 +4,7 @@ close all
 clear all
 
 runsim = 1;
-old = 1; % if 1, uses old parameters. If 0, uses young.
+old = 0; % if 1, uses old parameters. If 0, uses young.
 
 % will load previous simulation results to save time
 if ~runsim
@@ -23,7 +23,6 @@ if old == 1 % old - used if "old" = 1
     param.mya = 77; % effort offset 
     param.myb = 20; %b in metabolic equation (new = 15)
     param.myao = 69; % resting rate for older adults
-%     param.myao = 77; % resting rate for older adults
     param.myi=0.88;  %exponent on distance
     
 elseif old == 0 % young - used if "old" = 0        
@@ -35,7 +34,7 @@ elseif old == 0 % young - used if "old" = 0
     param.myi=1.23;  %exponent on distance
 end
 
-%both
+%for both
 param.myc0to = -1; % Used in optimization
 param.myc1to = 10; % Used in optimization
 % param.myc0to = -6; % -8.75; % Used in new RT function

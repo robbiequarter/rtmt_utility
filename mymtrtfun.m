@@ -9,8 +9,8 @@ global param
 %alpha, c0, c1, c0to, c1to, ao, a, b
 Er=@(Tr,a,b) (a*Tr + b./(Tr)); %reaching cost, basically normal effort cost (no distance, mass, etc.)
 Eo=@(To,ao)(ao*To); %sitting cost, ao is sitting cost, To is sitting
-Pr=@(Tr,c0,c1) 1; %Probability of reward as a function of reach time (tr)
-% Pr=@(Tr,c0,c1) (1./(1 + exp(-c0 - c1*Tr))); %Probability of reward as a function of reach time (tr)
+% Pr=@(Tr,c0,c1) 1; %Probability of reward as a function of reach time (tr)
+Pr=@(Tr,c0,c1) (1./(1 + exp(-c0 - c1*Tr))); %Probability of reward as a function of reach time (tr)
 Prto =@(To,c0to,c1to) (1./(1 + exp(-c0to - c1to*To))); %(*Probability of reward as a function of reacton time (to)
 
 % New RT function:

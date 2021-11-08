@@ -1,15 +1,23 @@
 %% 
 clear all 
 close all
-cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
 
-load('simresults/simresults_young.mat'); 
+% data
+cd('\Users\rjc5t\Documents\Neuromechanics\DATA\Reward');
+dat = readtable('Results\reward_table_long.csv');
+dat = dat(dat.PREF == 0 & dat.TARG ~= 99 , :); % & dat.ID ~= 7
+% aggregate data into means
+aggdat = grpstats(dat, {'MASS','REWD'}, {'mean', 'sem'});
+
+cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
+load('simresults/simresults_young7.mat'); 
 young = mysols;
 % old
-load('simresults/simresults_old.mat'); 
+load('simresults/simresults_old7.mat'); 
 old = mysols;
 
-%% 
+
+%% Define some variables
 %range of alpha values - used in optimization
 myalphas=20:100; % iterating over different levels of reward to see what happens
 
@@ -31,8 +39,9 @@ rwdhigh = 55;
 alphalow = find(myalphas==rwdlow);
 alphahigh = find(myalphas==rwdhigh);
 
-%%
+%% Process data
 
+% Organize model data
 for j=1:length(myeffscales)
     
     effcurvesyoung=squeeze(young(:,j,alphascaleind,probscaleind,:));
@@ -60,6 +69,13 @@ for k=1:length(myalphascales)
     stackData2(k,2,1) = rwdpropsyoung(1,k);
     stackData2(k,2,2) = rwdpropsyoung(2,k);
 end
+
+% Proportions of savings from empirical data
+dattimes(:,1) = table2array(aggdat(aggdat.MASS ==0 & aggdat.REWD == 1, [14,16]))' - table2array(aggdat(aggdat.MASS ==0 & aggdat.REWD == 0, [14,16]))'; % col 1 = no mass, row 1 = RT
+dattimes(:,2) = table2array(aggdat(aggdat.MASS ==1 & aggdat.REWD == 1, [14,16]))' - table2array(aggdat(aggdat.MASS ==1 & aggdat.REWD == 0, [14,16]))';
+datprops(1,1) = dattimes(2,1)/sum(dattimes(:,1)); datprops(2,1) = 1-datprops(1,1);
+datprops(1,2) = dattimes(2,2)/sum(dattimes(:,2)); datprops(2,2) = 1-datprops(1,2);
+
 
 %% Proprotion barplots, separated MT/RT
 figure
@@ -92,65 +108,69 @@ figure
 
 %% Figure for horizontal proportions, stacked
 figure
-    subplot(3,1,1)
+    subplot(4,1,1)
         [tme, r, v, a] = minjerk([0,0],[0,0.1],1,.001);
         plot(tme,v(:,2))
-    subplot(3,1,2)
+    subplot(4,1,2)
         barh(categorical(myeffscales), [effpropsyoung(2,:)' effpropsyoung(1,:)'],'stacked');
-        ylabel('Increasing Effort Scaling');
+        ylabel(sprintf('Increasing Effort\nScale'));
         xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
         set(gca,'ydir','reverse');
         legend('RT','MT','Location','southeast');
-    subplot(3,1,3)
+    subplot(4,1,3)
         barh(categorical(myalphascales), [rwdpropsyoung(2,:)' rwdpropsyoung(1,:)'] ,'stacked');
-        ylabel('Reducing Reward Scaling');
+        ylabel(sprintf('Reducing Reward\nScale'));
         xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+    subplot(4,1,4)
+        barh(categorical({'LOW','HIGH'}), [datprops(2,:)' datprops(1,:)'] ,'stacked');
+        ylabel('Effort');
+        xlabel(sprintf(['Proportion of savings'], rwdhigh, rwdlow));
     beautifyfig;
     
 %% Re-worked curves, x-axis is scaling factor, each line is different rewards
-alphas = 21:10:51;
-for j = 1:length(myeffscales)
-        effmt(:,j) = squeeze(young(alphas,j,alphascaleind,probscaleind,1)); % MT 
-        effrt(:,j) = squeeze(young(alphas,j,alphascaleind,probscaleind,2)); 
-
-        rwdmt(:,j) = squeeze(young(alphas,effscaleind,j,probscaleind,1)); 
-        rwdrt(:,j) = squeeze(young(alphas,effscaleind,j,probscaleind,2));
-end
-
-
-
-figure
-for j = 1:length(alphas)
-        subplot(2,1,1)          
-            h(1,1)=plot(myeffscales,effmt(j,:),'o-'); % MT
-            hold on 
-            h(1,2)=plot(myeffscales,effrt(j,:),'x-'); % RT
-            %h(1,2).LineStyle = '--'; % RT = dashed
-            % Thicker and more colored = Increasing effort scale
-                h(1,1).Color=j*[1 0 0]./length(alphas);
-                h(1,2).Color=j*[0 0 1]./length(alphas);
-                h(1,1).LineWidth = 1; 
-                h(1,2).LineWidth = 1;
-            legend(h(1,:),'MT','RT')
-            xlabel('Effort Scale')
-            ylabel('Duration (s)')
-%             set(gca,'ylim',[0.3 1.4])
-
-        subplot(2,1,2)          
-            h(1,1)=plot(myeffscales,rwdmt(j,:),'o-'); % MT
-            hold on 
-            h(1,2)=plot(myeffscales,rwdrt(j,:),'x-'); % RT
-            %h(1,2).LineStyle = '--'; % RT = dashed
-            % Thicker and more colored = Increasing effort scale
-                h(1,1).Color=j*[1 0 0]./length(alphas);
-                h(1,2).Color=j*[0 0 1]./length(alphas);
-                h(1,1).LineWidth = 1; 
-                h(1,2).LineWidth = 1;
-            legend('MT','RT')
-            xlabel('Reward Scale')
-            ylabel('Duration (s)')
-            set(gca,'xdir','reverse');
-end
+% alphas = 21:10:51;
+% for j = 1:length(myeffscales)
+%         effmt(:,j) = squeeze(young(alphas,j,alphascaleind,probscaleind,1)); % MT 
+%         effrt(:,j) = squeeze(young(alphas,j,alphascaleind,probscaleind,2)); 
+% 
+%         rwdmt(:,j) = squeeze(young(alphas,effscaleind,j,probscaleind,1)); 
+%         rwdrt(:,j) = squeeze(young(alphas,effscaleind,j,probscaleind,2));
+% end
+% 
+% 
+% 
+% figure
+% for j = 1:length(alphas)
+%         subplot(2,1,1)          
+%             h(1,1)=plot(myeffscales,effmt(j,:),'o-'); % MT
+%             hold on 
+%             h(1,2)=plot(myeffscales,effrt(j,:),'x-'); % RT
+%             %h(1,2).LineStyle = '--'; % RT = dashed
+%             % Thicker and more colored = Increasing effort scale
+%                 h(1,1).Color=j*[1 0 0]./length(alphas);
+%                 h(1,2).Color=j*[0 0 1]./length(alphas);
+%                 h(1,1).LineWidth = 1; 
+%                 h(1,2).LineWidth = 1;
+%             legend(h(1,:),'MT','RT')
+%             xlabel('Effort Scale')
+%             ylabel('Duration (s)')
+% %             set(gca,'ylim',[0.3 1.4])
+% 
+%         subplot(2,1,2)          
+%             h(1,1)=plot(myeffscales,rwdmt(j,:),'o-'); % MT
+%             hold on 
+%             h(1,2)=plot(myeffscales,rwdrt(j,:),'x-'); % RT
+%             %h(1,2).LineStyle = '--'; % RT = dashed
+%             % Thicker and more colored = Increasing effort scale
+%                 h(1,1).Color=j*[1 0 0]./length(alphas);
+%                 h(1,2).Color=j*[0 0 1]./length(alphas);
+%                 h(1,1).LineWidth = 1; 
+%                 h(1,2).LineWidth = 1;
+%             legend('MT','RT')
+%             xlabel('Reward Scale')
+%             ylabel('Duration (s)')
+%             set(gca,'xdir','reverse');
+% end
 
 
 

@@ -4,7 +4,7 @@ close all
 clear all
 
 runsim = 1;
-old = 0; % if 1, uses old parameters. If 0, uses young.
+old = 1; % if 1, uses old parameters. If 0, uses young.
 
 % will load previous simulation results to save time
 if ~runsim

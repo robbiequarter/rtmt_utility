@@ -75,8 +75,12 @@ if runsim
               param.myalphascale=myalphascales(k);  
               for m=1:length(myprobscales) %loop over probability scaling
                   param.myprobscale=myprobscales(m);
+%                   param.myprobscale=1.0; 
+                  % for use in moving effort/alpha scale simultaneously. 
+                  % Comment out above line, below line, 
+                  % and if/else for optimization loop.
                     
-                  mycond= (j==effscaleind) + (k==alphascaleind) + (m==probscaleind);
+                  mycond = (j==effscaleind) + (k==alphascaleind) + (m==probscaleind);
                   
                   if (mycond == 2 || mycond == 3) %only run optimization if all scalings are 1 OR only one scaling is not one (dont allow more variations)
                       options = optimset('Display','off','MaxFunEvals',100000,'MaxIter',100000);

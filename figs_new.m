@@ -34,10 +34,15 @@ probscaleind= find(myprobscales==1);
 myrange=find(myalphascales>=0.7);
 
 % For plotting things
-rwdlow = 50;
-rwdhigh = 55;
+rwdlow = 45;
+rwdhigh = 50;
 alphalow = find(myalphas==rwdlow);
 alphahigh = find(myalphas==rwdhigh);
+
+% global parameters needed
+global param
+param.myc0to = -1; % Used in RT function
+param.myc1to = 10; % Used in RT function
 
 %% Process data
 
@@ -121,35 +126,6 @@ effscalemat = repmat(myeffscales',1,5);
 alphascalemat = repmat(myalphascales,5,1);
 C = (1./effscalemat).*alphascalemat;
 
-%% Proprotion barplots, separated MT/RT
-% figure
-%     subplot(2,2,1)
-%         bar(categorical(myeffscales), effpropsyoung(2,:)','r');
-%     %     ylim([-0.07 0]);
-%         xlabel('Increasing Effort Scaling');
-%         ylabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%         title('Reaction Time');
-%     subplot(2,2,2)
-%         bar(categorical(myeffscales), effpropsyoung(1,:)');
-%     %     ylim([-0.07 0]);
-%         xlabel('Increasing Effort Scaling');
-%         ylabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%         title('Movement Time')
-%      subplot(2,2,3)
-%         bar(categorical(myalphascales), rwdpropsyoung(2,:),'r');
-%         set(gca,'xdir','reverse')
-%     %     ylim([-0.07 0]);
-%         xlabel('Reducing Reward Scaling');
-%         ylabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%         title('Reaction Time');
-%     subplot(2,2,4)
-%         bar(categorical(myalphascales), rwdpropsyoung(1,:));
-%     %     ylim([-0.07 0]);
-%         set(gca,'xdir','reverse')
-%         xlabel('Reducing Reward Scaling');
-%         ylabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%         title('Movement Time')
-
 %% Figure for horizontal proportions, stacked
 figure
 %     subplot(4,1,1)
@@ -175,80 +151,139 @@ figure
         xlabel(sprintf('Proportion of savings\nRWD - NRWD (a.u.)'));
     beautifyfig;
 
-%% Combined figure
+%% RT/MT Speed Accuracy, Reward Curves, and Proportions
 
-figure
-clear h
-% ADD 50-55J SHADING BOX
-% 2x2 for first figure, 2x1 for RT/MT bars, 2x2 for last line graphs
+% Speed-Accuracy Stuff for Plotting
+    % Scaled up RT probability function
+    Pr_oldyoung = @(Tr) (1./(1 + exp(-(param.myc0to) - (param.myc1to).*Tr)));
+    % Alternative RT function
+    k00 = 20; 
+    x00 = 0.30;
+    Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+
+    % Movement time fits
+    load speedaccdata.mat
+    % young fit
+    [logitCoefyoung,devyoung] = glmfit(mt.young(:,1),pR.young.y(:,1),'binomial','logit');
+    logitFityoung = glmval(logitCoefyoung,mt.young(:,1),'logit');
+    % old fit
+    [logitCoefold,devold] = glmfit(mt.old(:,1),pR.old.y(:,1),'binomial','logit');
+    logitFitold = glmval(logitCoefold,mt.old(:,1),'logit');
 
 % for shaded/highlighted patch of plot
-ptchidx = (myalphas >= rwdlow) & (myalphas <= rwdhigh);
-ptchcol = [221,160,221]./256;
-colgray = [0.6    0.6    0.6];
-unit = 1000; %scaling factor (to go from s to ms)
+    ptchidx = (myalphas >= rwdlow) & (myalphas <= rwdhigh);
+    ptchcol = [221,160,221]./256;
+    colgray = [0.6    0.6    0.6];
+    unit = 1000; %scaling factor (to go from s to ms)
 
-% subplot(4,5,[1,2,6,7])
-subplot(4,2,[1,3])
-    for i = 1:5
-        h(:,1)=plot(myalphas,squeeze(young(:,i,alphascaleind,probscaleind,:)).*unit,'LineWidth', 1);
-        hold on
-        h(1,1).Color = 1/i.*[0 1 0];
-        h(2,1).Color = 1/i.*[0 1 0];
-        h(2,1).LineStyle = '--';
-    %     h(2,1).Color = 'r';
-%         h(:,2)=plot(myalphas,squeeze(young(:,5,alphascaleind,probscaleind,:)).*unit,...
-%             'Color', 'r', 'LineWidth',1);
-%         h(2,2).LineStyle = '--';
-    %     h(2,2).Color = 'r';
-    %     title('Increasing effort valuation')
-    end
-    patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
-    ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')
-    legend('EffScale = 0.8')
-%     xlabel('Reward (alpha,J)')
-    xticks([40 60 80 100])
-    yticks([300 600 900 1200 1500])
-    ylabel('Duration (ms)')
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[35 65])
+figure
+clear h    
+tiledlayout(7,2)    
+nexttile(1,[3 1])
+    fplot(Pr_oldyoung,'Color','k', 'LineWidth', 1, 'DisplayName', 'Orig. RT function')
+    hold on
+    fplot(Pr_test2, 'Color', [.7 .7 .7], 'LineWidth', 1, 'DisplayName', 'Alt. RT function')
+    xline(0.150,'k--','HandleVisibility','off'); yline(.25,'k--','HandleVisibility','off');
+    legend('show', 'Location','southeast');
+    xlim([-0.5 1.0]);
+    xlabel('Reaction time (s)'); ylabel('Probability of success');
+    hold off
     
-% subplot(4,5,[11,12,16,17])
-subplot(4,2,[5,7])
-    for i = 1:5
-        h(:,1)=plot(myalphas,squeeze(young(:,effscaleind,i,probscaleind,:)).*unit,...
-                    'LineWidth', 1);
-        hold on
-        h(2,1).LineStyle = '--';
-        h(1,1).Color = i.*[1/5 0 0];
-        h(2,1).Color = i.*[1/5 0 0];
-    end
+nexttile(2,[3 1])
+    scatter(mt.young(:,1),pR.young.y(:,1),'gs', 'MarkerFaceColor','g', 'MarkerFaceAlpha',0.5);
+    hold on
+    scatter(mt.old(:,1),pR.old.y(:,1),'rs','MarkerFaceColor','r', 'MarkerFaceAlpha',0.5);
+    %plot models fits
+    mts=0:0.05:1.5;
+    logitCoefyoung =[ -4.9277 9.8371];
+    logitCoefold =[ -8.8805 14.5769];
+    % young fit
+    b0=logitCoefyoung(1); b1=logitCoefyoung(2);
+    plot(mts, 1./(1+exp(-b0 - mts*b1)),'g','LineWidth', 1);
+    % old fit
+    b0=logitCoefold(1); b1=logitCoefold(2);
+    plot(mts, 1./(1+exp(-b0 - mts*b1)),'r','LineWidth', 1);
+    yline(.5,'k--','HandleVisibility','off');
+    hold off
+    xlabel('Movement time (s)'); 
+    ylabel('Probability of success');
+    legend('Young','Old','Location','southeast');
+    set(gca,'xlim',[0 1.5])
+
+nexttile(7,[3 1])
+    % young effort curves   
+    h(:,1)=plot(myalphas,squeeze(young(:,3,alphascaleind,probscaleind,:)).*unit,'LineWidth', 1);
+    hold on
+    h(2,1).LineStyle = '--'; % dashed = RT
+    h(1,1).Color = 'g';
+    h(2,1).Color = 'g';
+    % old effort curves
+    h(:,2)=plot(myalphas,squeeze(old(:,3,alphascaleind,probscaleind,:)).*unit,'Color', 'r', 'LineWidth',1);
+    h(2,2).LineStyle = '--';
+    h(1,2).Color = 'r';
+    h(2,2).Color = 'r';
+    title('Increasing reaching effort')
+    plot(repmat(myalphas(alphalow),[4 1]), [squeeze(old(alphalow,3,alphascaleind,probscaleind,:)); squeeze(young(alphalow,3,alphascaleind,probscaleind,:))].*unit, 'k>','MarkerSize',4.0)
+    plot(repmat(myalphas(alphahigh),[4 1]), [squeeze(old(alphahigh,3,alphascaleind,probscaleind,:)); squeeze(young(alphahigh,3,alphascaleind,probscaleind,:))].*unit, 'k<','MarkerSize',4.0)
+    % highlighted region
     patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
-        ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')
-    legend('RWDScale = 0.8')
+    ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')    
+    legend(h(:,1),'MT','RT');
     xlabel('Reward (alpha,J)')
-    ylabel('Duration (ms)')
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[35 65])
+    ylabel('Duration (ms)')
+    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
     
-% subplot(4,5,3)
-subplot(4,2,[2 4])
-    barh(categorical(myeffscales), [effpropsyoung(2,:)' effpropsyoung(1,:)'],'stacked');
-    ylabel(sprintf('Increasing Effort\nScale'));
-%     xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-    set(gca,'ydir','reverse');
-%     legend('RT','MT','Location','southeast');
+nexttile(8,[3 1])
+    % 1.0 RWD scale curves   
+    h(:,1)=plot(myalphas,squeeze(young(:,effscaleind,3,probscaleind,:)).*unit,'LineWidth', 1);
+    hold on
+    h(2,1).LineStyle = '--'; % dashed = RT
+    h(1,1).Color = 'g';
+    h(2,1).Color = 'g';
+    % 0.8 RWD scale effort curves
+    h(:,2)=plot(myalphas,squeeze(young(:,effscaleind,1,probscaleind,:)).*unit,...
+        'Color', 'r', 'LineWidth',1);
+    h(2,2).LineStyle = '--';
+    h(1,2).Color = 'r';
+    h(2,2).Color = 'r';
+    title('Reducing reward scaling')
+    plot(repmat(myalphas(alphalow),[4 1]), [squeeze(young(alphalow,effscaleind,3,probscaleind,:)); squeeze(young(alphalow,effscaleind,1,probscaleind,:))].*unit, 'k>','MarkerSize',4.0)
+    plot(repmat(myalphas(alphahigh),[4 1]), [squeeze(young(alphahigh,effscaleind,3,probscaleind,:)); squeeze(young(alphahigh,effscaleind,1,probscaleind,:))].*unit, 'k<','MarkerSize',4.0)
+    % highlighted region
+    patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
+    ptchcol, 'FaceAlpha', 0.3, 'EdgeColor','none')
+    legend(h(:,1),'MT','RT');
+    xlabel('Reward (alpha,J)')
+    xticks([40 60 80 100])
+    yticks([300 600 900 1200 1500])
+    ylabel('Duration (ms)')
+    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+    
+nexttile(13)
+    b = barh(categorical({'Young' 'Old'}), [effpropsyoung(2,3)' effpropsyoung(1,3)'; effpropsold(2,3)' effpropsold(1,3)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [2/5 0 0; 0 2/5 0;];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [5/5 0 0; 0 5/5 0];
+    ylabel(sprintf('Increased effort'));
+    xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
     
 
-% subplot(4,5,13)
-subplot(4,2,[6 8])
-    barh(categorical(myalphascales), [rwdpropsyoung(2,:)' rwdpropsyoung(1,:)'] ,'stacked');
-    ylabel(sprintf('Reducing Reward\nScale'));
+nexttile(14)
+    b = barh(categorical({'High' 'Low'}), [rwdpropsyoung(2,3)' rwdpropsyoung(1,3)'; rwdpropsyoung(2,1)' rwdpropsyoung(1,1)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 5/5 0; 5/5 0 0];
+    ylabel(sprintf('Reward scale'));
     xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+    set(gca,'ydir','reverse')
 
 beautifyfig;
 
-%% Combined figure using old/young data
+%% Combined figure using old/young data and 3D Surface plots
 
 figure
 clear h
@@ -282,7 +317,7 @@ nexttile(1,[4 3])
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[29 65])
+    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[25 65])
     hold off
     
 nexttile(4,[4,3])
@@ -302,7 +337,7 @@ nexttile(4,[4,3])
     ylabel('Duration (ms)')
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[29 65])
+    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[25 65])
     hold off
     
 nexttile(25,[2,2])

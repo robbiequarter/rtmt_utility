@@ -1,0 +1,263 @@
+%% Re-creating figures with simulated old/young data
+clear all
+close all
+
+%% 1. Load in data for each simulation
+%young
+load('simresults_young.mat');
+young = mysols;
+
+%old
+load('simresults_old2.mat');
+old = mysols;
+
+%% 2. Set parameters
+global param
+
+%metabolic data parameters: etotal = esit + emove = ao*to + a*t + (b*d^i)/T
+
+%old
+param.myc0 = -9; % accuracy parameters; shifts logistic to the right with scaling
+param.myc1 = 15; % accuracy parameters; shifts logistic to the left with scaling
+param.mya = 77; % effort offset 
+param.myb = 20; %b in metabolic equation 
+param.myao = 69; % resting rate for older adults
+param.myi=0.88;  %exponent on distance
+
+%young
+param.myc0young = -5;  
+param.myc1young = 10; 
+param.myayoung = 77;
+param.mybyoung = 12;
+param.myaoyoung = 77;
+param.myiyoung=1.23;
+
+%both
+param.myc0to = -1; % Used in optimization
+param.myc1to = 10; % Used in optimization
+param.myeffscale = 1; 
+
+%distance
+d=0.1;
+
+%range of alpha values - used in optimization
+myalphas=20:100; % iterating over different levels of reward to see what happens
+
+%range of SCALING on effort, alpha, and probability - used in optimization
+myeffscales = 0.8:0.1:1.2;
+myalphascales= 0.8:0.1:1.2;
+myprobscales = 0.8:0.1:1.2;
+
+% use this index to focus on alpha of a certain value
+alphaind=find(myalphas==70);
+alphascaleind=find(myalphascales==1);
+effscaleind=find(myeffscales==1);
+probscaleind= find(myprobscales==1);
+myrange=find(myalphascales>=0.7);
+
+%% 3. Effort Valuation Figure #1
+%Effort Valuation Scaling
+
+% figure
+% for j = 1:length(myeffscales)
+%     subplot(1,5,j)    
+%         h(:,1)=plot(myalphas,squeeze(old(:,j,alphascaleind,probscaleind,:)),...
+%             'Color', 'r', 'LineWidth', 1);
+%         hold on
+%         h(2,1).LineStyle = '--';
+%         h(:,2)=plot(myalphas,squeeze(young(:,j,alphascaleind,probscaleind,:)),...
+%             'Color', 'g', 'LineWidth',1);
+%         h(2,2).LineStyle = '--';
+% 
+%         title(sprintf(['Increasing effort valuation\n (effort scaling)']))
+%         legend(h(1,:),'Old','Young')
+%         xlabel('Reward (alpha,J)')
+%         ylabel('Duration (s)')
+%         set(gca,'ylim',[0.3 1.4])
+%         hold off
+% end
+
+%% 4. Effort & Reward Valuation Figure
+figure(2) 
+for j = 1:length(myeffscales)
+    subplot(2,2,1)    
+        h(:,1)=plot(myalphas,squeeze(old(:,j,alphascaleind,probscaleind,:)));
+        hold on
+        h(2,1).LineStyle = '--'; % RT = dashed
+        % Thicker and more colored = Increasing effort scale
+            h(1,1).Color=j*[1 0 0]./length(myeffscales); 
+            h(2,1).Color=j*[1 0 0]./length(myeffscales);
+            h(1,1).LineWidth=1; %0.3*j
+            h(2,1).LineWidth=1;
+        legend(h(:,1),'MT','RT')
+        xlabel('Reward (alpha,J)')
+        ylabel('Duration (s)')
+        title('OLD')
+        set(gca,'ylim',[0.3 1.4])
+        
+    subplot(2,2,2)
+        h(:,2)=plot(myalphas,squeeze(young(:,j,alphascaleind,probscaleind,:)));
+        hold on 
+        h(2,2).LineStyle = '--'; % RT = dashed
+        % Thicker and more colored = Increasing effort scale
+            h(1,2).Color=j*[0 1 0]./length(myeffscales);
+            h(2,2).Color=j*[0 1 0]./length(myeffscales);
+            h(1,2).LineWidth = 1; 
+            h(2,2).LineWidth = 1;
+        legend(h(:,2),'MT','RT')
+        xlabel('Reward (alpha,J)')
+        ylabel('Duration (s)')
+        title('YOUNG')
+        set(gca,'ylim',[0.3 1.4])
+end
+% sgtitle(sprintf(['Increasing effort valuation\n (effscaling)']));
+
+figure(2)
+%Reward Valuation Scaling
+for k = 1:length(myalphascales)
+    subplot(2,2,3)    
+        h(:,1)=plot(myalphas,squeeze(old(:,effscaleind,k,probscaleind,:)));
+        hold on
+        h(2,1).LineStyle = '--'; % RT = dashed
+        % Thicker and more colored = Increasing reward scale
+            h(1,1).Color=k*[1 0 0]./length(myalphascales); 
+            h(2,1).Color=k*[1 0 0]./length(myalphascales);
+            h(1,1).LineWidth=1;
+            h(2,1).LineWidth=1;
+        legend(h(:,1),'MT','RT')
+        xlabel('Reward (alpha,J)')
+        ylabel('Duration (s)')
+        title('OLD')
+        set(gca,'ylim',[0.3 1.4])
+        
+    subplot(2,2,4)
+        h(:,2)=plot(myalphas,squeeze(young(:,effscaleind,k,probscaleind,:)));
+        hold on 
+        h(2,2).LineStyle = '--'; % RT = dashed
+        % Thicker and more colored = Increasing effort scale
+            h(1,2).Color=k*[0 1 0]./length(myalphascales);
+            h(2,2).Color=k*[0 1 0]./length(myalphascales);
+            h(1,2).LineWidth=1; 
+            h(2,2).LineWidth=1;
+        legend(h(:,2),'MT','RT')
+        xlabel('Reward (alpha,J)')
+        ylabel('Duration (s)')
+        title('YOUNG')
+        set(gca,'ylim',[0.3 1.4])
+end
+sgtitle(sprintf(['Top Row: Effort Scaling\n Bottom Row: Alpha Scaling']));
+
+%% 5. Re-create the Hackier Figure
+figure
+j = 3; %effindex
+h(:,1)=plot(myalphas,squeeze(old(:,j,alphascaleind,probscaleind,:)),...
+            'Color', 'r', 'LineWidth', 1);
+hold on
+h(2,1).LineStyle = '--';
+h(:,2)=plot(myalphas,squeeze(young(:,j,alphascaleind,probscaleind,:)),...
+    'Color', 'g', 'LineWidth',1);
+h(2,2).LineStyle = '--';
+
+title(sprintf(['Increasing effort valuation\n (effort scaling)']))
+legend(h(1,:),'Old','Young')
+xlabel('Reward (alpha,J)')
+ylabel('Duration (s)')
+set(gca,'ylim',[0.3 1.4])
+beautifyfig;
+
+%% 6. Delta RT/MT for a Change in Reward Barplots
+% Maybe try like reward = 100 - 50 for different effort scalings
+rwd = 35;
+alphalow = find(myalphas==rwd);
+alphahigh = find(myalphas==2*rwd);
+
+for j=1:length(myeffscales)
+    effcurvesold=squeeze(old(:,j,alphascaleind,probscaleind,:));
+    effcurvesold_mt(:,j)=effcurvesold(:,1);
+    effcurvesold_rt(:,j)=effcurvesold(:,2);   
+    effdeltasold(1,j) = effcurvesold_mt(alphahigh,j) - effcurvesold_mt(alphalow,j);
+    effdeltasold(2,j) = effcurvesold_rt(alphahigh,j) - effcurvesold_rt(alphalow,j);
+    stackData1(j,1,1) = effdeltasold(1,j);
+    stackData1(j,1,2) = effdeltasold(2,j);
+    
+    effcurvesyoung=squeeze(young(:,j,alphascaleind,probscaleind,:));
+    effcurvesyoung_mt(:,j)=effcurvesyoung(:,1);
+    effcurvesyoung_rt(:,j)=effcurvesyoung(:,2);
+    effdeltasyoung(1,j) = effcurvesyoung_mt(alphahigh,j) - effcurvesyoung_mt(alphalow,j);
+    effdeltasyoung(2,j) = effcurvesyoung_rt(alphahigh,j) - effcurvesyoung_rt(alphalow,j);
+    stackData1(j,2,1) = effdeltasyoung(1,j);
+    stackData1(j,2,2) = effdeltasyoung(2,j);
+end
+
+for k=1:length(myalphascales)
+    alphacurvesold=squeeze(old(:,effscaleind,k,probscaleind,:));
+    alphacurvesold_mt(:,k)=alphacurvesold(:,1);
+    alphacurvesold_rt(:,k)=alphacurvesold(:,2);
+    rwddeltasold(1,k) = alphacurvesold_mt(alphahigh,k) - alphacurvesold_mt(alphalow,k);
+    rwddeltasold(2,k) = alphacurvesold_rt(alphahigh,k) - alphacurvesold_rt(alphalow,k);
+    stackData2(k,1,1) = rwddeltasold(1,k);
+    stackData2(k,1,2) = rwddeltasold(2,k);
+    
+    alphacurvesyoung=squeeze(young(:,effscaleind,k,probscaleind,:));
+    alphacurvesyoung_mt(:,k)=alphacurvesyoung(:,1);
+    alphacurvesyoung_rt(:,k)=alphacurvesyoung(:,2);
+    rwddeltasyoung(1,k) = alphacurvesyoung_mt(alphahigh,k) - alphacurvesyoung_mt(alphalow,k);
+    rwddeltasyoung(2,k) = alphacurvesyoung_rt(alphahigh,k) - alphacurvesyoung_rt(alphalow,k);
+    stackData2(k,2,1) = rwddeltasyoung(1,k);
+    stackData2(k,2,2) = rwddeltasyoung(2,k);
+end
+
+figure
+subplot(2,2,1)
+    bar(myeffscales, abs(effdeltasold'), 'stacked');
+%     ylim([0 0.8]);
+    xlabel('Effort Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+    title('Old');
+    legend('MT', 'RT','Location', 'southeast');
+subplot(2,2,2)
+    bar(myeffscales, abs(effdeltasyoung'), 'stacked');
+%     ylim([0 0.8]);
+    xlabel('Effort Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+    title('Young')
+ subplot(2,2,3)
+    bar(myalphascales, abs(rwddeltasold'), 'stacked');
+%     ylim([0 0.8]);
+    xlabel('Reward Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+    title('Old');
+    legend('MT', 'RT','Location', 'southeast');
+subplot(2,2,4)
+    bar(myalphascales, abs(rwddeltasyoung'), 'stacked');
+%     ylim([0 0.8]);
+    xlabel('Reward Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+    title('Young')
+
+%% Grouped + Stacked Barplots
+% Uses plotBarStackGroups.m from File Exchange:
+% Evan (2021). Plot Groups of Stacked Bars (https://www.mathworks.com/matlabcentral/fileexchange/32884-plot-groups-of-stacked-bars), 
+%   MATLAB Central File Exchange. Retrieved May 18, 2021. 
+
+figure
+groupLabels = {'0.8', '0.9', '1.0', '1.1', '1.2'};
+subplot(2,1,1)
+    plotBarStackGroups(stackData1, groupLabels)
+    xlabel('Effort Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+%     ylim([-0.8, 0]);
+    legend('MT Old', 'RT Old', 'MT Young', 'RT Young',...
+        'Location', 'south', 'Orientation', 'horizontal');
+subplot(2,1,2)
+    plotBarStackGroups(stackData2, groupLabels)
+    xlabel('Reward Scaling');
+    ylabel(sprintf(['\\DeltaT (s)\n%dJ - %dJ'], 2*rwd, rwd));
+%     ylim([-0.8, 0]);
+    legend('MT Old', 'RT Old', 'MT Young', 'RT Young',...
+        'Location', 'south', 'Orientation', 'horizontal');
+
+
+
+
+

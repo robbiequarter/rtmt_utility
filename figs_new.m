@@ -10,10 +10,10 @@ dat = dat(dat.PREF == 0 & dat.TARG ~= 99 , :); % & dat.ID ~= 7
 aggdat = grpstats(dat, {'MASS','REWD'}, {'mean', 'sem'});
 
 cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
-load('simresults/simresults_young10.mat'); 
+load('simresults/simresults_young7.mat'); 
 young = mysols;
 % old
-load('simresults/simresults_old10.mat'); 
+load('simresults/simresults_young11.mat'); 
 old = mysols;
 
 
@@ -34,8 +34,8 @@ probscaleind= find(myprobscales==1);
 myrange=find(myalphascales>=0.7);
 
 % For plotting things
-rwdlow = 45;
-rwdhigh = 50;
+rwdlow = 30;
+rwdhigh = 35;
 alphalow = find(myalphas==rwdlow);
 alphahigh = find(myalphas==rwdhigh);
 
@@ -306,10 +306,11 @@ nexttile(1,[4 3])
         h(2,i).Color = 1/i.*[0 1 0];
         h(2,i).LineStyle = '--';
     end
-    h(:,i+1)=plot(myalphas,squeeze(old(:,3,alphascaleind,probscaleind,:)).*unit,...
-        'Color', 'r', 'LineWidth',1);
-    h(2,i+1).LineStyle = '--';
-    legend(h(1,[1 3 5 6]),'Young 0.8', 'Young 1.0', 'Young 1.2', 'Old')
+%     h(:,i+1)=plot(myalphas,squeeze(old(:,3,alphascaleind,probscaleind,:)).*unit,...
+%         'Color', 'r', 'LineWidth',1);
+%     h(2,i+1).LineStyle = '--';
+%     legend(h(1,[1 3 5 6]),'Young 0.8', 'Young 1.0', 'Young 1.2', 'Old')
+    legend(h(1,[1 3 5]),'Effort 0.8', 'Effort 1.0', 'Effort 1.2')
     
     patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
     ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none','HandleVisibility','off')
@@ -317,27 +318,27 @@ nexttile(1,[4 3])
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[25 65])
+    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[28 100])
     hold off
     
 nexttile(4,[4,3])
     for i = 1:5
-        h(:,1)=plot(myalphas,squeeze(young(:,effscaleind,i,probscaleind,:)).*unit,...
+        h(:,i)=plot(myalphas,squeeze(young(:,effscaleind,i,probscaleind,:)).*unit,...
                     'LineWidth', 1);
         hold on
-        h(2,1).LineStyle = '--';
-        h(1,1).Color = i.*[0 0 1/5];
-        h(2,1).Color = i.*[0 0 1/5];
+        h(2,i).LineStyle = '--';
+        h(1,i).Color = i.*[0 1/5 0];
+        h(2,i).Color = i.*[0 1/5 0];
     end
     
     patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
         ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')
-    legend('RWDScale = 0.8')
+    legend(h(1,[1 3 5]),'RWD 0.8', 'RWD 1.0', 'RWD 1.2')
     xlabel('Reward (alpha,J)')
     ylabel('Duration (ms)')
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
-    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[25 65])
+    set(gca,'ylim',[0.3 1.2].*unit,'xlim',[28 100])
     hold off
     
 nexttile(25,[2,2])
@@ -365,7 +366,63 @@ cb.Label.String = 'Relative Utility';
 
 beautifyfig;
 
+%% RT/MT Speed Accuracy Changes
 
+% for shaded/highlighted patch of plot
+    ptchidx = (myalphas >= rwdlow) & (myalphas <= rwdhigh);
+    ptchcol = [221,160,221]./256;
+    colgray = [0.6    0.6    0.6];
+    unit = 1000; %scaling factor (to go from s to ms)
+
+figure
+clear h    
+tiledlayout(7,1)    
+nexttile(1,[3 1])
+    mts = 0:0.05:1.5;
+    plot(mts, 1./(1+exp(-(-5) - mts*(10))),'g', 'LineWidth',1);
+    hold on
+    plot(mts, 1./(1+exp(-(-5) - mts*(7.5))),'r', 'LineWidth',1);
+    % plot(mts, 1./(1+exp(-(-9) - mts*(15))),'g');
+    % plot(mts, 1./(1+exp(-(-6) - mts*(8))),'g--');
+    xlabel('Movement time (s)'); ylabel('P(success)'); title('Changing speed-accuracy tradeoff for MT')
+    legend('High Acc.: c_0 = -5, c_1 = 10','Low Acc.: c_0 = -5, c_1 = 7.5', 'Location','southeast')
+
+nexttile(4,[3 1])
+    % young effort curves   
+    h(:,1)=plot(myalphas,squeeze(young(:,3,alphascaleind,probscaleind,:)).*unit,'LineWidth', 1);
+    hold on
+    h(2,1).LineStyle = '--'; % dashed = RT
+    h(1,1).Color = 'g';
+    h(2,1).Color = 'g';
+    % old effort curves
+    h(:,2)=plot(myalphas,squeeze(old(:,3,alphascaleind,probscaleind,:)).*unit,'Color', 'r', 'LineWidth',1);
+    h(2,2).LineStyle = '--';
+    h(1,2).Color = 'r';
+    h(2,2).Color = 'r';
+    title('Increasing reaching effort')
+    plot(repmat(myalphas(alphalow),[4 1]), [squeeze(old(alphalow,3,alphascaleind,probscaleind,:)); squeeze(young(alphalow,3,alphascaleind,probscaleind,:))].*unit, 'k>','MarkerSize',4.0)
+    plot(repmat(myalphas(alphahigh),[4 1]), [squeeze(old(alphahigh,3,alphascaleind,probscaleind,:)); squeeze(young(alphahigh,3,alphascaleind,probscaleind,:))].*unit, 'k<','MarkerSize',4.0)
+    % highlighted region
+    patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
+    ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')    
+    legend(h(:,1),'MT','RT');
+    xlabel('Reward (alpha,J)')
+    xticks([40 60 80 100])
+    yticks([300 600 900 1200 1500])
+    ylabel('Duration (ms)')
+    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+        
+nexttile(7)
+    clear b
+    b = barh(categorical({'High Acc.','Low Acc.'}), [effpropsyoung(2,3) effpropsyoung(1,3); effpropsold(2,3) effpropsold(1,3)], 'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 1 0; 1 0 0];
+    ylabel(sprintf('Increased effort'));
+    xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+
+beautifyfig;
 
 
 

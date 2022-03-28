@@ -18,10 +18,10 @@ global param
 
 %metabolic data parameters: etotal = esit + emove = ao*to + a*t + (b*d^i)/T
 if old == 1 % old - used if "old" = 1
-%     param.myc0 = -9; % accuracy parameters; shifts logistic to the right with scaling
-%     param.myc1 = 15; % accuracy parameters; shifts logistic to the left with scaling
-    param.myc0 = -6; % INaccuracy parameters; shifts logistic to the right with scaling
-    param.myc1 = 8; % INaccuracy parameters; shifts logistic to the left with scaling
+    param.myc0 = -9; % accuracy parameters; shifts logistic to the right with scaling
+    param.myc1 = 15; % accuracy parameters; shifts logistic to the left with scaling
+%     param.myc0 = -6; % INaccuracy parameters; shifts logistic to the right with scaling
+%     param.myc1 = 8; % INaccuracy parameters; shifts logistic to the left with scaling
     param.mya = 77; % effort offset 
     param.myb = 20; %b in metabolic equation (new = 15)
     param.myao = 69; % resting rate for older adults
@@ -29,25 +29,28 @@ if old == 1 % old - used if "old" = 1
     
 elseif old == 0 % young - used if "old" = 0        
     param.myc0 = -5; % accuracy parameters; shifts logistic to the right with scaling
-    param.myc1 = 10; % accuracy parameters; shifts logistic to the left with scaling
+    param.myc1 = 10; % accuracy parameters; lower value reduces steepness of logistic curve
 %     param.myc0 = -5; % INaccuracy parameters; shifts logistic to the right with scaling
 %     param.myc1 = 7.5; % INaccuracy parameters; shifts logistic to the left with scaling  
+%     param.myc0 = -5; % more INaccuracy parameters; shifts logistic to the right with scaling
+%     param.myc1 = 5; % more INaccuracy parameters; shifts logistic to the left with scaling 
     param.mya = 77; % effort offset 
     param.myb = 12; %b in metabolic equation (new = 11)
     param.myao = 77; % resting rate for younger adults
     param.myi=1.23;  %exponent on distance
 end
 
-mts = 0:0.05:1.5;
-figure
-plot(mts, 1./(1+exp(-(-5) - mts*(10))),'r');
-hold on
-plot(mts, 1./(1+exp(-(-5) - mts*(7.5))),'r--');
-% plot(mts, 1./(1+exp(-(-9) - mts*(15))),'g');
-% plot(mts, 1./(1+exp(-(-6) - mts*(8))),'g--');
-xlabel('Movement time (s)'); ylabel('P(success)'); title('Changing speed-accuracy tradeoff for MT')
-legend('Orig: c_0 = -5, c_1 = 10','New: c_0 = -5, c_1 = 7.5', 'Location','southeast')
-
+% mts = 0:0.05:1.5;
+% figure
+% plot(mts, 1./(1+exp(-(-5) - mts*(10))),'r');
+% hold on
+% plot(mts, 1./(1+exp(-(-5*1.2) - mts*(10))),'b');
+% plot(mts, 1./(1+exp(-(-5) - mts*(7.5))),'r--');
+% plot(mts, 1./(1+exp(-(-5) - mts*(5))),'r.-');
+% % plot(mts, 1./(1+exp(-(-6) - mts*(15))),'g');
+% % plot(mts, 1./(1+exp(-(-6) - mts*(8))),'g--');
+% xlabel('Movement time (s)'); ylabel('P(success)'); title('Changing speed-accuracy tradeoff for MT')
+% legend('Orig: c_0 = -5, c_1 = 10','New: c_0 = -5, c_1 = 7.5', 'Location','southeast')
 
 %for both
 param.myc0to = -1; % Used in optimization
@@ -132,9 +135,21 @@ xlabel('Reward (alpha,J)')
 ylabel('Duration (s)')
 set(gca,'ylim',[0.3 1.4])
 
-%Reward Valuation Scaling
+% %Reward Valuation Scaling
+% subplot(132)
+% for k=1:length(myalphascales)
+%     h(:,k)=plot(myalphas,squeeze(mysols(:,effscaleind,k,probscaleind,:)));
+%     hold on
+%     h(1,k).Color=k*[0 0 1]./length(myalphascales);
+%     h(2,k).Color=k*[1 0 0]./length(myalphascales);
+%     
+%     h(1,k).LineWidth=0.3*k;
+%     h(2,k).LineWidth=0.3*k;
+% end
+
+% Probability Scaling
 subplot(132)
-for k=1:length(myalphascales)
+for k=1:length(myprobscales)
     h(:,k)=plot(myalphas,squeeze(mysols(:,effscaleind,k,probscaleind,:)));
     hold on
     h(1,k).Color=k*[0 0 1]./length(myalphascales);

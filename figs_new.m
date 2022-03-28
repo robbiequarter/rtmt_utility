@@ -13,7 +13,7 @@ cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
 load('simresults/simresults_young7.mat'); 
 young = mysols;
 % old
-load('simresults/simresults_young11.mat'); 
+load('simresults/simresults_old7.mat'); 
 old = mysols;
 
 
@@ -47,6 +47,8 @@ param.myc1to = 10; % Used in RT function
 %% Process data
 
 % Organize model data
+
+% effort scale differences
 for j=1:length(myeffscales)
     % young data
     effcurvesyoung=squeeze(young(:,j,alphascaleind,probscaleind,:));
@@ -69,6 +71,7 @@ for j=1:length(myeffscales)
     effpropsold(2,j) = (effcurvesold_rt(alphahigh,j) - effcurvesold_rt(alphalow,j))/effsavingsold; % RT proportion of time savings
 end
 
+% reward scale differences
 for k=1:length(myalphascales)
     alphacurvesyoung=squeeze(young(:,effscaleind,k,probscaleind,:));
     alphacurvesyoung_mt(:,k)=alphacurvesyoung(:,1);
@@ -87,6 +90,27 @@ for k=1:length(myalphascales)
     rwddeltasold(2,k) = (alphacurvesold_rt(alphahigh,k) - alphacurvesold_rt(alphalow,k));
     rwdpropsold(1,k) = (alphacurvesold_mt(alphahigh,k) - alphacurvesold_mt(alphalow,k))/rwdsavingsold; % MT proportion of time savings
     rwdpropsold(2,k) = (alphacurvesold_rt(alphahigh,k) - alphacurvesold_rt(alphalow,k))/rwdsavingsold; % RT proportion of time savings
+end
+
+% probability scale differences
+for m=1:length(myprobscales)
+    probcurvesyoung=squeeze(young(:,effscaleind,alphascaleind,m,:));
+    probcurvesyoung_mt(:,m)=probcurvesyoung(:,1);
+    probcurvesyoung_rt(:,m)=probcurvesyoung(:,2);
+    probsavings = ((probcurvesyoung_rt(alphahigh,m) - probcurvesyoung_rt(alphalow,m))+(probcurvesyoung_mt(alphahigh,m) - probcurvesyoung_mt(alphalow,m)));
+    probdeltasyoung(1,m) = (probcurvesyoung_mt(alphahigh,m) - probcurvesyoung_mt(alphalow,m));
+    probdeltasyoung(2,m) = (probcurvesyoung_rt(alphahigh,m) - probcurvesyoung_rt(alphalow,m));
+    probpropsyoung(1,m) = (probcurvesyoung_mt(alphahigh,m) - probcurvesyoung_mt(alphalow,m))/probsavings; % MT proportion of time savings
+    probpropsyoung(2,m) = (probcurvesyoung_rt(alphahigh,m) - probcurvesyoung_rt(alphalow,m))/probsavings; % RT proportion of time savings
+    
+    probcurvesold=squeeze(old(:,effscaleind,alphascaleind,m,:));
+    probcurvesold_mt(:,m)=probcurvesold(:,1);
+    probcurvesold_rt(:,m)=probcurvesold(:,2);
+    probsavingsold = ((probcurvesold_rt(alphahigh,m) - probcurvesold_rt(alphalow,m))+(probcurvesold_mt(alphahigh,m) - probcurvesold_mt(alphalow,m)));
+    probdeltasold(1,m) = (probcurvesold_mt(alphahigh,m) - probcurvesold_mt(alphalow,m));
+    probdeltasold(2,m) = (probcurvesold_rt(alphahigh,m) - probcurvesold_rt(alphalow,m));
+    probpropsold(1,m) = (probcurvesold_mt(alphahigh,m) - probcurvesold_mt(alphalow,m))/probsavingsold; % MT proportion of time savings
+    probpropsold(2,m) = (probcurvesold_rt(alphahigh,m) - probcurvesold_rt(alphalow,m))/probsavingsold; % RT proportion of time savings
 end
 
 % Proportions of savings from empirical data
@@ -139,10 +163,15 @@ figure
         set(gca,'ydir','reverse');
         legend('RT','MT','Location','southeast');
 %     subplot(4,1,3)
+%     subplot(3,1,2)
+%         barh(categorical(myalphascales), [rwdpropsyoung(2,:)' rwdpropsyoung(1,:)'] ,'stacked');
+%         ylabel(sprintf('Reducing Reward\nScale'));
+%         xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
     subplot(3,1,2)
-        barh(categorical(myalphascales), [rwdpropsyoung(2,:)' rwdpropsyoung(1,:)'] ,'stacked');
-        ylabel(sprintf('Reducing Reward\nScale'));
+        barh(categorical(myprobscales), [probpropsyoung(2,:)' probpropsyoung(1,:)'] ,'stacked');
+        ylabel(sprintf('Reducing Accuracy\nScale'));
         xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+        set(gca,'ydir','reverse');
 %     subplot(4,1,4)
     subplot(3,1,3)
         x = categorical({'LOW','HIGH' 'YOUNG' 'OLD'});
@@ -410,7 +439,9 @@ nexttile(4,[3 1])
     xticks([40 60 80 100])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
-    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+    set(gca,'xlim',[25 65])
+
         
 nexttile(7)
     clear b

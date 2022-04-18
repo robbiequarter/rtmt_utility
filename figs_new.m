@@ -521,7 +521,7 @@ beautifyfig;
 
 figure
 clear h    
-tiledlayout(7,3)
+tiledlayout(8,3)
 
 % RT speed-accuracy logisitic/CDFs
 nexttile(1,[3 1])
@@ -695,8 +695,8 @@ nexttile(20)
     b(2).FaceColor = 'flat';
     b(2).CData = [0 5/5 0; 5/5 0 0];
     ylabel(sprintf('Reward scale'));
-    xlabel(sprintf(['Time savings(s)\n%dJ - %dJ'], rwdhigh, rwdlow));
-    set(gca,'ydir','reverse', 'xdir','reverse')    
+    xlabel(sprintf(['Time savings (s)\n%dJ - %dJ'], rwdhigh, rwdlow));
+    set(gca,'ydir','reverse', 'xdir','reverse')   
 
 % Time savings barplots for probability scale
 nexttile(21)
@@ -707,7 +707,41 @@ nexttile(21)
     b(2).CData = [0 5/5 0; 5/5 0 0];
     ylabel(sprintf('Accuracy scale'));
     xlabel(sprintf(['Time savings (s)\n%dJ - %dJ'], rwdhigh, rwdlow));
-    set(gca,'ydir','reverse', 'xdir','reverse')    
+    set(gca,'ydir','reverse', 'xdir','reverse') 
+
+% Proportion time savings barplots for effort scale
+nexttile(22)
+    b = barh(categorical({'Young' 'Old'}), [effpropsyoung(2,3)' effpropsyoung(1,3)'; effpropsold(2,3)' effpropsold(1,3)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [2/5 0 0; 0 2/5 0;];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [5/5 0 0; 0 5/5 0];
+    ylabel(sprintf('Increased effort'));
+    xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+
+% Proportion time savings barplots for reward scale 
+nexttile(23)
+    b = barh(categorical({'High' 'Low'}), [rwdpropsyoung(2,3)' rwdpropsyoung(1,3)'; rwdpropsyoung(2,1)' rwdpropsyoung(1,1)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 5/5 0; 5/5 0 0];
+    ylabel(sprintf('Reward scale'));
+    xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+    %set(gca,'ydir','reverse', 'xdir','reverse')   
+    set(gca,'ydir','reverse') 
+
+% Proportion time savings barplots for probability scale
+nexttile(24)
+    b = barh(categorical({'High' 'Low'}), [probpropsyoung(2,3)' probpropsyoung(1,3)'; probpropsyoung(2,5)' probpropsyoung(1,5)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 5/5 0; 5/5 0 0];
+    ylabel(sprintf('Accuracy scale'));
+    xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+    %set(gca,'ydir','reverse', 'xdir','reverse') 
+    set(gca,'ydir','reverse')
 
 beautifyfig;
 

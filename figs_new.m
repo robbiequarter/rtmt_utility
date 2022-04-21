@@ -10,16 +10,16 @@ dat = dat(dat.PREF == 0 & dat.TARG ~= 99 , :); % & dat.ID ~= 7
 aggdat = grpstats(dat, {'MASS','REWD'}, {'mean', 'sem'});
 
 cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
-load('simresults/simresults_young7.mat'); 
+load('simresults/simresults_young13.mat'); 
 young = mysols;
 % old
-load('simresults/simresults_old7.mat'); 
+load('simresults/simresults_old13.mat'); 
 old = mysols;
 
 
 %% Define some variables
 %range of alpha values - used in optimization
-myalphas=20:100; % iterating over different levels of reward to see what happens
+myalphas=20:200; % iterating over different levels of reward to see what happens
 
 %range of SCALING on effort, alpha, and probability - used in optimization
 myeffscales = 0.8:0.1:1.2;
@@ -34,8 +34,8 @@ probscaleind= find(myprobscales==1);
 myrange=find(myalphascales>=0.7);
 
 % For plotting things
-rwdlow = 35;
-rwdhigh = 40;
+rwdlow = 185; %35
+rwdhigh = 190; %40
 alphalow = find(myalphas==rwdlow);
 alphahigh = find(myalphas==rwdhigh);
 
@@ -43,8 +43,8 @@ alphahigh = find(myalphas==rwdhigh);
 global param
 param.myc0to = -1; % Used in RT function
 param.myc1to = 10; % Used in RT function
-param.myc0 = -9; % MT young accuracy parameters; shifts logistic to the right with scaling
-param.myc1 = 15; % MT young accuracy parameters; shifts logistic to the left with scaling
+param.myc0 = -5; % MT young accuracy parameters; shifts logistic to the right with scaling
+param.myc1 = 10; % MT young accuracy parameters; shifts logistic to the left with scaling
 
 
 %% Process data
@@ -645,36 +645,6 @@ nexttile(12,[3 1])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
-    
-% nexttile(19)
-%     b = barh(categorical({'Young' 'Old'}), [effpropsyoung(2,3)' effpropsyoung(1,3)'; effpropsold(2,3)' effpropsold(1,3)'],'stacked');
-%     b(1).FaceColor = 'flat';
-%     b(1).CData = [2/5 0 0; 0 2/5 0;];
-%     b(2).FaceColor = 'flat';
-%     b(2).CData = [5/5 0 0; 0 5/5 0];
-%     ylabel(sprintf('Increased effort'));
-%     xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%     
-% 
-% nexttile(20)
-%     b = barh(categorical({'High' 'Low'}), [rwdpropsyoung(2,3)' rwdpropsyoung(1,3)'; rwdpropsyoung(2,1)' rwdpropsyoung(1,1)'],'stacked');
-%     b(1).FaceColor = 'flat';
-%     b(1).CData = [0 2/5 0; 2/5 0 0];
-%     b(2).FaceColor = 'flat';
-%     b(2).CData = [0 5/5 0; 5/5 0 0];
-%     ylabel(sprintf('Reward scale'));
-%     xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%     set(gca,'ydir','reverse')
-%     
-% nexttile(21)
-%     b = barh(categorical({'High' 'Low'}), [probpropsyoung(2,3)' probpropsyoung(1,3)'; probpropsyoung(2,5)' probpropsyoung(1,5)'],'stacked');
-%     b(1).FaceColor = 'flat';
-%     b(1).CData = [0 2/5 0; 2/5 0 0];
-%     b(2).FaceColor = 'flat';
-%     b(2).CData = [0 5/5 0; 5/5 0 0];
-%     ylabel(sprintf('Accuracy scale'));
-%     xlabel(sprintf(['Proportion of savings\n%dJ - %dJ'], rwdhigh, rwdlow));
-%     set(gca,'ydir','reverse')
 
 % Time savings barplots for effort scale
 nexttile(19)

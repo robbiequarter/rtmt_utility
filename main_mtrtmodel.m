@@ -40,30 +40,18 @@ elseif old == 0 % young - used if "old" = 0
     param.myi=1.23;  %exponent on distance
 end
 
-% mts = 0:0.05:1.5;
-% figure
-% plot(mts, 1./(1+exp(-(-5) - mts*(10))),'r');
-% hold on
-% plot(mts, 1./(1+exp(-(-5*1.2) - mts*(10))),'b');
-% plot(mts, 1./(1+exp(-(-5) - mts*(7.5))),'r--');
-% plot(mts, 1./(1+exp(-(-5) - mts*(5))),'r.-');
-% % plot(mts, 1./(1+exp(-(-6) - mts*(15))),'g');
-% % plot(mts, 1./(1+exp(-(-6) - mts*(8))),'g--');
-% xlabel('Movement time (s)'); ylabel('P(success)'); title('Changing speed-accuracy tradeoff for MT')
-% legend('Orig: c_0 = -5, c_1 = 10','New: c_0 = -5, c_1 = 7.5', 'Location','southeast')
-
 %for both
 param.myc0to = -1; % Used in optimization
 param.myc1to = 10; % Used in optimization
 % param.myc0to = -6; % -8.75; % Used in new RT function
 % param.myc1to = 20; % 35; % Used in new RT function
-param.myeffscale = 1; 
+% param.myeffscale = 1; 
 
 %distance
 d=0.1;
 
 %range of alpha values
-myalphas=20:100;
+myalphas=20:200;
 % myalphas=40:110; % iterating over different levels of reward to see what happens
 
 %range of SCALING on effort, alpha, and probability terms - used in

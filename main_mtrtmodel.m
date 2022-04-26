@@ -4,7 +4,7 @@ close all
 clear all
 
 runsim = 1;
-old = 1; % if 1, uses old parameters. If 0, uses young.
+old = 0; % if 1, uses old parameters. If 0, uses young.
 
 % will load previous simulation results to save time
 if ~runsim
@@ -28,8 +28,10 @@ if old == 1 % old - used if "old" = 1
     param.myi=0.88;  %exponent on distance
     
 elseif old == 0 % young - used if "old" = 0        
-    param.myc0 = -5; % accuracy parameters; shifts logistic to the right with scaling
-    param.myc1 = 10; % accuracy parameters; lower value reduces steepness of logistic curve
+%     param.myc0 = -5; % accuracy parameters; shifts logistic to the right with scaling
+%     param.myc1 = 10; % accuracy parameters; lower value reduces steepness of logistic curve
+    param.myc0 = -9; % older parameters; shifts logistic to the right with scaling
+    param.myc1 = 15; % older parameters; shifts logistic to the left with scaling
 %     param.myc0 = -5; % INaccuracy parameters; shifts logistic to the right with scaling
 %     param.myc1 = 7.5; % INaccuracy parameters; shifts logistic to the left with scaling  
 %     param.myc0 = -5; % more INaccuracy parameters; shifts logistic to the right with scaling

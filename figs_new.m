@@ -11,19 +11,19 @@ aggdat = grpstats(dat, {'MASS','REWD'}, {'mean', 'sem'});
 
 % young
 cd("C:\Users\rjc5t\Documents\Neuromechanics\DATA\UtilityModel\rtmtutility\")
-load('simresults/simresults_young14.mat'); 
+load('simresults/simresults_young_exp1.mat'); 
 young = mysols;
 
 % old
-load('simresults/simresults_old14.mat'); 
+load('simresults/simresults_old_exp1.mat'); 
 old = mysols;
 
-%young w/ MT speed-accuracy
-load('simresults/simresults_young13.mat'); 
+%young w/o (=1) MT speed-accuracy
+load('simresults/simresults_oldyo_exp1.mat'); 
 young2 = mysols;
 
 %young w/ old MT speed-accuracy
-load('simresults/simresults_young15.mat'); 
+load('simresults/simresults_old13.mat'); 
 old2 = mysols;
 
 
@@ -44,17 +44,24 @@ probscaleind= find(myprobscales==1);
 myrange=find(myalphascales>=0.7);
 
 % For plotting things
-rwdlow = 150; %185; %35
-rwdhigh = 180; %190; %40
+rwdlow = 35; %185; %35
+rwdhigh = 40; %190; %40
 alphalow = find(myalphas==rwdlow);
 alphahigh = find(myalphas==rwdhigh);
 
 % global parameters needed
 global param
-param.myc0to = -1; % Used in RT function
-param.myc1to = 10; % Used in RT function
+param.myc0to = -1; % Used in OG RT function
+param.myc1to = 10; % Used in OG RT function
 param.myc0 = -5; % MT young accuracy parameters; shifts logistic to the right with scaling
 param.myc1 = 10; % MT young accuracy parameters; shifts logistic to the left with scaling
+param.myc0to2 = -6; % Used in new RT function
+param.myc1to2 = 20; % Used in new RT function
+
+%distance
+d=0.1;
+% param.ntarg = ceil((2*pi*d)/0.016);
+param.ntarg = 4;
 
 
 %% Process data
@@ -269,9 +276,10 @@ figure
     % Scaled up RT probability function
     Pr_oldyoung = @(Tr) (1./(1 + exp(-(param.myc0to) - (param.myc1to).*Tr)));
     % Alternative RT function
-    k00 = 20; 
-    x00 = 0.30;
-    Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+%     k00 = 20; 
+%     x00 = 0.30;
+%     Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+    Pr_test2 = @(Tr) ((1-(1/param.ntarg))./(1 + exp(-(param.myc0to2) - (param.myc1to2).*Tr))) + (1/param.ntarg); % n targets
 
     % Movement time fits
     load speedaccdata.mat
@@ -550,10 +558,11 @@ beautifyfig;
     % Scaled up RT probability function
     Pr_oldyoung = @(Tr) (1./(1 + exp(-(param.myc0to) - (param.myc1to).*Tr)));
     % Alternative RT function
-    k00 = 20; 
-    x00 = 0.30;
-    Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
-
+%     k00 = 20; 
+%     x00 = 0.30;
+%     Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+    Pr_test2 = @(Tr) ((1-(1/param.ntarg))./(1 + exp(-(param.myc0to2) - (param.myc1to2).*Tr))) + (1/param.ntarg); % n targets
+    
     % Movement time fits
     load speedaccdata.mat
     % young fit
@@ -776,9 +785,10 @@ beautifyfig;
     % Scaled up RT probability function
     Pr_oldyoung = @(Tr) (1./(1 + exp(-(param.myc0to) - (param.myc1to).*Tr)));
     % Alternative RT function
-    k00 = 20; 
-    x00 = 0.30;
-    Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+%     k00 = 20; 
+%     x00 = 0.30;
+%     Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+    Pr_test2 = @(Tr) ((1-(1/param.ntarg))./(1 + exp(-(param.myc0to2) - (param.myc1to2).*Tr))) + (1/param.ntarg); % n targets
 
     % Movement time fits
     load speedaccdata.mat
@@ -871,6 +881,8 @@ nexttile(10,[3 1])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 200])
+
     
 % RT/MT curves for reward scale
 nexttile(11,[3 1])
@@ -898,7 +910,8 @@ nexttile(11,[3 1])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
-
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 200])
+    
 % RT/MT curves for probability scale
 nexttile(12,[3 1])
     % 1.0 Prob scale curves   
@@ -925,7 +938,8 @@ nexttile(12,[3 1])
     yticks([300 600 900 1200 1500])
     ylabel('Duration (ms)')
     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
-
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 200])
+    
 % Time savings barplots for effort scale
 nexttile(19)
     b = barh(categorical({'Young' 'Old'}), [effdeltasyoung(2,3)' effdeltasyoung(1,3)'; effdeltasold(2,3)' effdeltasold(1,3)'],'stacked');
@@ -991,5 +1005,177 @@ nexttile(24)
     ylabel(sprintf('Accuracy scale'));
     xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
     %set(gca,'ydir','reverse', 'xdir','reverse') 
+
+beautifyfig;
+
+
+%% Effort, Reward, and Probability Scaling combined v3
+% includes both delta savings and proportion savings
+% RWD scale changes looking at when only rwd scale changes for older adult,
+% while using young adult effort.
+
+% Speed-Accuracy Stuff for Plotting
+    % Scaled up RT probability function
+    Pr_oldyoung = @(Tr) (1./(1 + exp(-(param.myc0to) - (param.myc1to).*Tr)));
+    % Alternative RT function
+    k00 = 20; 
+    x00 = 0.30;
+    Pr_test2 = @(Tr) (0.75./(1 + exp(-k00.*(Tr - x00))))+0.25;
+
+    % Movement time fits
+    load speedaccdata.mat
+    % young fit
+    [logitCoefyoung,devyoung] = glmfit(mt.young(:,1),pR.young.y(:,1),'binomial','logit');
+    logitFityoung = glmval(logitCoefyoung,mt.young(:,1),'logit');
+    % old fit
+    [logitCoefold,devold] = glmfit(mt.old(:,1),pR.old.y(:,1),'binomial','logit');
+    logitFitold = glmval(logitCoefold,mt.old(:,1),'logit');
+    
+    % Movement time speed-accuracy with changing probability scale
+    logitAcc = @(Tr) 1./(1+exp(-(param.myc0) - Tr.*(param.myc1)));
+    logitInacc = @(Tr) 1./(1+exp(-(1.2.*param.myc0) - Tr.*(param.myc1))); % higher probability scale = more inaccuracy
+    
+% for shaded/highlighted patch of plot
+    ptchidx = (myalphas >= rwdlow) & (myalphas <= rwdhigh);
+    ptchcol = [221,160,221]./256;
+    colgray = [0.6    0.6    0.6];
+    unit = 1000; %scaling factor (to go from s to ms)
+
+figure
+clear h    
+tiledlayout(8,2)
+
+% RT speed-accuracy logisitic/CDFs
+nexttile(1,[3 1])
+    fplot(Pr_oldyoung,'Color','k', 'LineWidth', 1, 'DisplayName', 'Orig. RT function')
+    hold on
+    fplot(Pr_test2, 'Color', [.7 .7 .7], 'LineWidth', 1, 'DisplayName', 'Alt. RT function')
+    xline(0.150,'k--','HandleVisibility','off'); yline(.25,'k--','HandleVisibility','off');
+    legend('show', 'Location','southeast');
+    xlim([-0.5 1.0]);
+    xlabel('Reaction time (s)'); ylabel('Probability of success');
+    hold off
+
+% Fitted MT speed-accuracy logisitic curves
+nexttile(2,[3 1])
+    scatter(mt.young(:,1),pR.young.y(:,1),'gs', 'MarkerFaceColor','g', 'MarkerFaceAlpha',0.5);
+    hold on
+    scatter(mt.old(:,1),pR.old.y(:,1),'rs','MarkerFaceColor','r', 'MarkerFaceAlpha',0.5);
+    %plot models fits
+    mts=0:0.05:1.5;
+    logitCoefyoung =[ -4.9277 9.8371];
+    logitCoefold =[ -8.8805 14.5769];
+    % young fit
+    b0=logitCoefyoung(1); b1=logitCoefyoung(2);
+    plot(mts, 1./(1+exp(-b0 - mts*b1)),'g','LineWidth', 1);
+    % old fit
+    b0=logitCoefold(1); b1=logitCoefold(2);
+    plot(mts, 1./(1+exp(-b0 - mts*b1)),'r','LineWidth', 1);
+    yline(.5,'k--','HandleVisibility','off');
+    hold off
+    xlabel('Movement time (s)'); 
+    ylabel('Probability of success');
+    legend('Young','Old','Location','southeast');
+    set(gca,'xlim',[0 1.5])
+
+% RT/MT curves for effort scale
+nexttile(7,[3 1])
+    % young effort curves   
+    h(:,1)=plot(myalphas,squeeze(young(:,3,alphascaleind,probscaleind,:)).*unit,'LineWidth', 1);
+    hold on
+    h(2,1).LineStyle = '--'; % dashed = RT
+    h(1,1).Color = 'g';
+    h(2,1).Color = 'g';
+    % old effort curves
+    h(:,2)=plot(myalphas,squeeze(old(:,3,alphascaleind,probscaleind,:)).*unit,'Color', 'r', 'LineWidth',1);
+    h(2,2).LineStyle = '--';
+    h(1,2).Color = 'r';
+    h(2,2).Color = 'r';
+    title('Increasing reaching effort')
+    plot(repmat(myalphas(alphalow),[4 1]), [squeeze(old(alphalow,3,alphascaleind,probscaleind,:)); squeeze(young(alphalow,3,alphascaleind,probscaleind,:))].*unit, 'k>','MarkerSize',4.0)
+    plot(repmat(myalphas(alphahigh),[4 1]), [squeeze(old(alphahigh,3,alphascaleind,probscaleind,:)); squeeze(young(alphahigh,3,alphascaleind,probscaleind,:))].*unit, 'k<','MarkerSize',4.0)
+    % highlighted region
+    patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
+    ptchcol, 'FaceAlpha',0.3, 'EdgeColor','none')    
+    legend(h(:,1),'MT','RT');
+    xlabel('Reward (alpha,J)')
+    xticks([30 40 50 60])
+    yticks([300 600 900 1200 1500])
+    ylabel('Duration (ms)')
+    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 200])
+
+    
+% RT/MT curves for reward scale
+nexttile(8,[3 1])
+    % 1.0 RWD scale curves (old 3)
+    h(:,1)=plot(myalphas,squeeze(young(:,effscaleind,3,probscaleind,:)).*unit,'LineWidth', 1);
+    hold on
+    h(2,1).LineStyle = '--'; % dashed = RT
+    h(1,1).Color = 'g';
+    h(2,1).Color = 'g';
+    % 0.8 RWD scale effort curves (old 1)
+    h(:,2)=plot(myalphas,squeeze(young2(:,effscaleind,1,probscaleind,:)).*unit,...
+        'Color', 'r', 'LineWidth',1);
+    h(2,2).LineStyle = '--';
+    h(1,2).Color = 'r';
+    h(2,2).Color = 'r';
+    title('Reducing reward scaling')
+    plot(repmat(myalphas(alphalow),[4 1]), [squeeze(young2(alphalow,effscaleind,1,probscaleind,:)); squeeze(young(alphalow,effscaleind,3,probscaleind,:))].*unit, 'k>','MarkerSize',4.0)
+    plot(repmat(myalphas(alphahigh),[4 1]), [squeeze(young2(alphahigh,effscaleind,1,probscaleind,:)); squeeze(young(alphahigh,effscaleind,3,probscaleind,:))].*unit, 'k<','MarkerSize',4.0)
+    % highlighted region
+    patch([myalphas(ptchidx) fliplr(myalphas(ptchidx))], [1.5.*ones(size(myalphas(ptchidx))).*unit -0.5.*ones(size(myalphas(ptchidx))).*unit],...
+    ptchcol, 'FaceAlpha', 0.3, 'EdgeColor','none')
+    legend(h(:,1),'MT','RT');
+    xlabel('Reward (alpha,J)')
+    xticks([30 40 50 60])
+    yticks([300 600 900 1200 1500])
+    ylabel('Duration (ms)')
+    set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 65])
+%     set(gca,'ylim',[0.3 1.5].*unit,'xlim',[25 200])
+    
+% Time savings barplots for effort scale
+nexttile(13)
+    b = barh(categorical({'Young' 'Old'}), [effdeltasyoung(2,3)' effdeltasyoung(1,3)'; effdeltasold(2,3)' effdeltasold(1,3)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [2/5 0 0; 0 2/5 0;];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [5/5 0 0; 0 5/5 0];
+    ylabel(sprintf('Increased effort'));
+    xlabel(sprintf(['Time savings (s)\n%dJ - %dJ'], rwdhigh, rwdlow));
+    set(gca, 'xdir','reverse')
+
+% Time savings barplots for reward scale 
+nexttile(14)
+    b = barh(categorical({'High' 'Low'}), [rwddeltasyoung(2,3)' rwddeltasyoung(1,3)'; rwddeltasyoung2(2,1)' rwddeltasyoung2(1,1)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 5/5 0; 5/5 0 0];
+    ylabel(sprintf('Reward scale'));
+    xlabel(sprintf(['Time savings (s)\n%dJ - %dJ'], rwdhigh, rwdlow));
+    set(gca,'ydir','reverse', 'xdir','reverse') % 'xlim',[-0.15 0]   
+
+% Proportion time savings barplots for effort scale
+nexttile(15)
+    b = barh(categorical({'Young' 'Old'}), [effpropsyoung(2,3)' effpropsyoung(1,3)'; effpropsold(2,3)' effpropsold(1,3)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [2/5 0 0; 0 2/5 0;];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [5/5 0 0; 0 5/5 0];
+    ylabel(sprintf('Increased effort'));
+    xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+
+% Proportion time savings barplots for reward scale 
+nexttile(16)
+    b = barh(categorical({'High' 'Low'}), [rwdpropsyoung(2,3)' rwdpropsyoung(1,3)'; rwdpropsyoung2(2,1)' rwdpropsyoung2(1,1)'],'stacked');
+    b(1).FaceColor = 'flat';
+    b(1).CData = [0 2/5 0; 2/5 0 0];
+    b(2).FaceColor = 'flat';
+    b(2).CData = [0 5/5 0; 5/5 0 0];
+    ylabel(sprintf('Reward scale'));
+    xlabel(sprintf(['Proportion of time savings\n%dJ - %dJ'], rwdhigh, rwdlow));
+    %set(gca,'ydir','reverse', 'xdir','reverse')   
+    set(gca,'ydir','reverse') 
 
 beautifyfig;

@@ -4,7 +4,7 @@ close all
 clear all
 
 runsim = 1;
-old = 0; % if 1, uses old parameters. If 0, uses young.
+old = 1; % if 1, uses old parameters. If 0, uses young.
 
 % will load previous simulation results to save time
 if ~runsim
@@ -20,22 +20,21 @@ global param
 if old == 1 % old - used if "old" = 1
     param.myc0 = -9; % accuracy parameters; shifts logistic to the right with scaling
     param.myc1 = 15; % accuracy parameters; shifts logistic to the left with scaling
-%     param.myc0 = -6; % INaccuracy parameters; shifts logistic to the right with scaling
-%     param.myc1 = 8; % INaccuracy parameters; shifts logistic to the left with scaling
+%     param.mya = 77; % effort offset 
+%     param.myb = 20; %b in metabolic equation (new = 15)
+%     param.myao = 69; % resting rate for older adults
+%     param.myi=0.88;  %exponent on distance
+
     param.mya = 77; % effort offset 
-    param.myb = 20; %b in metabolic equation (new = 15)
-    param.myao = 69; % resting rate for older adults
-    param.myi=0.88;  %exponent on distance
+    param.myb = 12; %b in metabolic equation (new = 11)
+    param.myao = 77; % resting rate for younger adults
+    param.myi=1.23;  %exponent on distance
     
 elseif old == 0 % young - used if "old" = 0        
-%     param.myc0 = -5; % accuracy parameters; shifts logistic to the right with scaling
-%     param.myc1 = 10; % accuracy parameters; lower value reduces steepness of logistic curve
-    param.myc0 = -9; % older parameters; shifts logistic to the right with scaling
-    param.myc1 = 15; % older parameters; shifts logistic to the left with scaling
-%     param.myc0 = -5; % INaccuracy parameters; shifts logistic to the right with scaling
-%     param.myc1 = 7.5; % INaccuracy parameters; shifts logistic to the left with scaling  
-%     param.myc0 = -5; % more INaccuracy parameters; shifts logistic to the right with scaling
-%     param.myc1 = 5; % more INaccuracy parameters; shifts logistic to the left with scaling 
+    param.myc0 = -5; % accuracy parameters; shifts logistic to the right with scaling
+    param.myc1 = 10; % accuracy parameters; lower value reduces steepness of logistic curve
+%     param.myc0 = -9; % older parameters; shifts logistic to the right with scaling
+%     param.myc1 = 15; % older parameters; shifts logistic to the left with scaling
     param.mya = 77; % effort offset 
     param.myb = 12; %b in metabolic equation (new = 11)
     param.myao = 77; % resting rate for younger adults
@@ -43,14 +42,18 @@ elseif old == 0 % young - used if "old" = 0
 end
 
 %for both
-param.myc0to = -1; % Used in optimization
-param.myc1to = 10; % Used in optimization
-% param.myc0to = -6; % -8.75; % Used in new RT function
-% param.myc1to = 20; % 35; % Used in new RT function
+% param.myc0to = -1; % Used in optimization
+% param.myc1to = 10; % Used in optimization
+param.myc0to = -6; % -8.75; % Used in new RT function
+param.myc1to = 20; % 35; % Used in new RT function
 % param.myeffscale = 1; 
 
 %distance
 d=0.1;
+% param.ntarg = ceil((2*pi*d)/0.016); % n targets that can fit around arc
+% circumference
+param.ntarg = 4; % experiment specific n targets
+
 
 %range of alpha values
 myalphas=20:200;
@@ -169,7 +172,7 @@ for m=1:length(myprobscales)
 end
 
 
-title(sprintf(['Decreasing reward probability/n (probscaling)']))
+title(sprintf(['Decreasing reward probability\n (probscaling)']))
 legend(h(:,m),'MT','RT')
 xlabel('Reward (alpha,J)')
 ylabel('Duration (s)')
